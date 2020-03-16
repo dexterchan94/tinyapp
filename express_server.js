@@ -22,9 +22,8 @@ const generateRandomString = (length) => {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect("/urls");
 });
-
 
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
@@ -35,6 +34,11 @@ app.post("/urls", (req, res) => {
   let shortURL = generateRandomString(6);
   urlDatabase[shortURL] = req.body.longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect("/urls");
 });
 
 app.get("/urls/new", (req, res) => {
