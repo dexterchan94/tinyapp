@@ -11,6 +11,16 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const generateRandomString = (length) => {
+  let result = "";
+  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+  for (let i = 0; i < length; i++) {
+    let char = characters[Math.floor((Math.random() * characters.length))];
+    result += char;
+  }
+  return result;
+};
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
@@ -19,6 +29,10 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  res.send(req.body.longURL);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -37,3 +51,4 @@ app.get("/hello", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
+
