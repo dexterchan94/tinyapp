@@ -36,6 +36,15 @@ const generateRandomString = (length) => {
   return result;
 };
 
+const emailExists = (users, email) => {
+  for (user in users) {
+    if (users[user]["email"] === email) {
+      return true;
+    }
+  }
+  return false;
+};
+
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
@@ -49,16 +58,21 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let newUserID = generateRandomString(6);
-  users[newUserID] = {
-    id: newUserID,
-    email: req.body.email,
-    password: req.body.password
-  };
-  res.cookie("user_id", newUserID);
-  console.log(users);
-  res.redirect("/urls");
-
+  if (req.body.email === "" || req.body.password === "") {
+    res.status(400).send("Must enter an email and password!");
+  } else if (emailExists(users, req.body.email)) {
+    res.status(400).send("Account already exists!");
+  } else {
+    let newUserID = generateRandomString(6);
+    users[newUserID] = {
+      id: newUserID,
+      email: req.body.email,
+      password: req.body.password
+    };
+    res.cookie("user_id", newUserID);
+    console.log(users);
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls", (req, res) => {
