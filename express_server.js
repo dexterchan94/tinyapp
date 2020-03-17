@@ -57,6 +57,14 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user_id: req.cookies["username"],
+    users
+  };
+  res.render("login", templateVars);
+});
+
 app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
     res.status(400).send("Must enter an email and password!");
