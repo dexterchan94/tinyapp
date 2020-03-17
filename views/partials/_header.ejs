@@ -9,11 +9,11 @@
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
-      <% if (username) { %>
+      <% if (user_id) { %>
 
       <form class="ml-auto form-inline" action="/logout" method="POST">
         <div class="form-group mb-2">
-          <span class="mr-2 text-white">Logged in as <%= username %></span>
+          <span class="mr-2 text-white">Logged in as <%= users[user_id].email %></span>
           <button type="submit" class="btn btn-primary">Logout</button>
         </div>
       </form>
