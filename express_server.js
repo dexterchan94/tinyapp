@@ -39,11 +39,13 @@ const generateRandomString = (length) => {
 const emailExists = (users, email) => {
   for (user in users) {
     if (users[user]["email"] === email) {
-      return true;
+      return user;
     }
   }
   return false;
 };
+
+
 
 app.get("/", (req, res) => {
   res.redirect("/urls");
@@ -51,18 +53,10 @@ app.get("/", (req, res) => {
 
 app.get("/register", (req, res) => {
   let templateVars = {
-    user_id: req.cookies["username"],
+    user_id: req.cookies["user_id"],
     users
   };
   res.render("register", templateVars);
-});
-
-app.get("/login", (req, res) => {
-  let templateVars = {
-    user_id: req.cookies["username"],
-    users
-  };
-  res.render("login", templateVars);
 });
 
 app.post("/register", (req, res) => {
@@ -83,6 +77,32 @@ app.post("/register", (req, res) => {
   }
 });
 
+app.get("/login", (req, res) => {
+  let templateVars = {
+    user_id: req.cookies["user_id"],
+    users
+  };
+  res.render("login", templateVars);
+});
+
+app.post("/login", (req, res) => {
+  const currentLogin = emailExists(users, req.body.email);
+  if (!currentLogin) {
+    res.status(403).send("That account does not exist!");
+  } else if (users[currentLogin].password !== req.body.password) {
+    res.status(403).send("Incorrect password!");
+  } else {
+    res.cookie("user_id", currentLogin);
+    res.redirect("/urls");
+  }
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("user_id");
+  res.redirect("/urls");
+});
+
+
 app.get("/urls", (req, res) => {
   let templateVars = {
     urls: urlDatabase,
@@ -90,6 +110,12 @@ app.get("/urls", (req, res) => {
     users: users
   };
   res.render("urls_index", templateVars);
+});
+
+app.post("/urls", (req, res) => {
+  let shortURL = generateRandomString(6);
+  urlDatabase[shortURL] = req.body.longURL;
+  res.redirect(`/urls/${shortURL}`);
 });
 
 app.get("/urls/new", (req, res) => {
@@ -100,10 +126,14 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = req.body.longURL;
-  res.redirect(`/urls/${shortURL}`);
+app.get("/urls/:shortURL", (req, res) => {
+  let templateVars = {
+    shortURL: req.params.shortURL,
+    longURL: urlDatabase[req.params.shortURL],
+    user_id: req.cookies["user_id"],
+    users
+  };
+  res.render("urls_show", templateVars);
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -117,35 +147,9 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 
-
-
-
-app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
-    user_id: req.cookies["user_id"],
-    users
-  };
-  res.render("urls_show", templateVars);
-});
-
-
-
 app.get("/u/:shortURL", (req, res) => {
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
-});
-
-app.post("/login", (req, res) => {
-  res.cookie("username", req.body.username);
-
-  res.redirect("/urls");
-});
-
-app.post("/logout", (req, res) => {
-  res.clearCookie("user_id");
-  res.redirect("/urls");
 });
 
 
