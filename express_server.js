@@ -77,12 +77,17 @@ app.post("/logout", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  let templateVars = {
-    urls: urlsForUser(req.session.user_id, urlDatabase),
-    user_id: req.session.user_id,
-    users: users
-  };
-  res.render("urls_index", templateVars);
+  if (req.session.user_id) {
+    const templateVars = {
+      urls: urlsForUser(req.session.user_id, urlDatabase),
+      user_id: req.session.user_id,
+      users: users
+    };
+    res.render("urls_index", templateVars);
+  } else {
+    res.redirect("/login");
+  }
+
 });
 
 app.post("/urls", (req, res) => {
