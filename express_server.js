@@ -33,9 +33,10 @@ app.get("/register", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
   } else {
-    let templateVars = {
+    const templateVars = {
       user_id: req.session.user_id,
-      users
+      users,
+      error: ""
     };
     res.render("register", templateVars);
   }
@@ -43,11 +44,21 @@ app.get("/register", (req, res) => {
 
 app.post("/register", (req, res) => {
   if (req.body.email === "" || req.body.password === "") {
-    res.status(400).send("Must enter an email and password!");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      error: "empty"
+    };
+    res.status(400).render("register", templateVars);
   } else if (getUserByEmail(users, req.body.email)) {
-    res.status(400).send("Account already exists!");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      error: "duplicate"
+    };
+    res.status(400).render("register", templateVars);
   } else {
-    let newUserID = generateRandomString(6);
+    const newUserID = generateRandomString(6);
     users[newUserID] = {
       id: newUserID,
       email: req.body.email,
@@ -62,9 +73,10 @@ app.get("/login", (req, res) => {
   if (req.session.user_id) {
     res.redirect("/urls");
   } else {
-    let templateVars = {
+    const templateVars = {
       user_id: req.session.user_id,
-      users
+      users,
+      error: ""
     };
     res.render("login", templateVars);
   }
@@ -74,9 +86,19 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const currentLogin = getUserByEmail(users, req.body.email);
   if (!currentLogin) {
-    res.status(403).send("That account does not exist!");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      error: "account"
+    };
+    res.status(403).render("login", templateVars);
   } else if (!bcrypt.compareSync(req.body.password, users[currentLogin].password)) {
-    res.status(403).send("Incorrect password!");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      error: "password"
+    };
+    res.status(403).render("login", templateVars);
   } else {
     req.session.user_id = currentLogin;
     res.redirect("/urls");
@@ -100,7 +122,7 @@ app.get("/urls", (req, res) => {
 
 app.post("/urls", (req, res) => {
   if (req.session.user_id) {
-    let shortURL = generateRandomString(6);
+    const shortURL = generateRandomString(6);
     urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
     res.redirect(`/urls/${shortURL}`);
   } else {
@@ -116,7 +138,7 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   if (req.session.user_id) {
-    let templateVars = {
+    const templateVars = {
       user_id: req.session.user_id,
       users
     };
