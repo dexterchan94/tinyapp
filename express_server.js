@@ -8,11 +8,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
 
-// const urlDatabase = {
-//   "b2xVn2": "http://www.lighthouselabs.ca",
-//   "9sm5xK": "http://www.google.com"
-// };
-
+// DATA OBJECTS ------------------------------------
 const urlDatabase = {
   "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
   "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
@@ -31,6 +27,7 @@ const users = {
   }
 }
 
+// HELPER FUNCTIONS ----------------------------------
 const generateRandomString = (length) => {
   let result = "";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -61,7 +58,7 @@ const urlsForUser = (id) => {
 };
 
 
-
+// ROUTES -----------------------------------
 app.get("/", (req, res) => {
   res.redirect("/urls");
 });
