@@ -15,10 +15,7 @@ app.use(cookieSession({
 app.set("view engine", "ejs");
 
 // DATA OBJECTS ------------------------------------
-const urlDatabase = {
-  // "b2xVn2": { longURL: "http://www.lighthouselabs.ca", userID: "userRandomID" },
-  // "9sm5xK": { longURL: "http://www.google.com", userID: "user2RandomID" }
-};
+const urlDatabase = {};
 
 const users = {};
 
