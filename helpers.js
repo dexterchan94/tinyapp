@@ -4,7 +4,7 @@ const getUserByEmail = (users, email) => {
       return user;
     }
   }
-  return false;
+  return undefined;
 };
 
 const generateRandomString = (length) => {
