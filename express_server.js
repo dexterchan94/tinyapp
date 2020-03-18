@@ -30,11 +30,15 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  let templateVars = {
-    user_id: req.session.user_id,
-    users
-  };
-  res.render("register", templateVars);
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {
+      user_id: req.session.user_id,
+      users
+    };
+    res.render("register", templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {
@@ -55,11 +59,16 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  let templateVars = {
-    user_id: req.session.user_id,
-    users
-  };
-  res.render("login", templateVars);
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    let templateVars = {
+      user_id: req.session.user_id,
+      users
+    };
+    res.render("login", templateVars);
+  }
+
 });
 
 app.post("/login", (req, res) => {
@@ -77,7 +86,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
-});
+})
 
 
 app.get("/urls", (req, res) => {
@@ -90,9 +99,19 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  let shortURL = generateRandomString(6);
-  urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
-  res.redirect(`/urls/${shortURL}`);
+  if (req.session.user_id) {
+    let shortURL = generateRandomString(6);
+    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
+    res.redirect(`/urls/${shortURL}`);
+  } else {
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.status(401).render("unauthorized", templateVars);
+  }
+
 });
 
 app.get("/urls/new", (req, res) => {
@@ -109,14 +128,24 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]["longURL"],
-    user_id: req.session.user_id,
-    users,
-    urlDatabase
-  };
-  res.render("urls_show", templateVars);
+  if (urlDatabase[req.params.shortURL]) {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.render("urls_show", templateVars);
+  } else {
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.status(404).render("url_none", templateVars);
+  }
+
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -124,7 +153,12 @@ app.post("/urls/:shortURL", (req, res) => {
     urlDatabase[req.params.shortURL]["longURL"] = req.body.longURL;
     res.redirect("/urls");
   } else {
-    res.status(401).send("You do not have permission to edit this URL");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.status(401).render("unauthorized", templateVars);
   }
 });
 
@@ -133,14 +167,28 @@ app.post("/urls/:shortURL/delete", (req, res) => {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
   } else {
-    res.status(401).send("You do not have permission to delete this URL");
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.status(401).render("unauthorized", templateVars);
   }
 });
 
 
 app.get("/u/:shortURL", (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL]["longURL"];
-  res.redirect(longURL);
+  if (urlDatabase[req.params.shortURL]) {
+    const longURL = urlDatabase[req.params.shortURL]["longURL"];
+    res.redirect(longURL);
+  } else {
+    const templateVars = {
+      user_id: req.session.user_id,
+      users,
+      urlDatabase
+    };
+    res.status(404).render("url_none", templateVars);
+  }
 });
 
 
