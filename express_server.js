@@ -158,13 +158,21 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL", (req, res) => {
-  urlDatabase[req.params.shortURL]["longURL"] = req.body.longURL;
-  res.redirect("/urls");
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL]["userID"]) {
+    urlDatabase[req.params.shortURL]["longURL"] = req.body.longURL;
+    res.redirect("/urls");
+  } else {
+    res.status(401).send("You do not have permission to edit this URL");
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (req.cookies["user_id"] === urlDatabase[req.params.shortURL]["userID"]) {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  } else {
+    res.status(401).send("You do not have permission to delete this URL");
+  }
 });
 
 
