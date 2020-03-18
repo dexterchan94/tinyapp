@@ -1,5 +1,6 @@
 const express = require("express");
 const cookieParser = require('cookie-parser')
+const bcrypt = require('bcrypt');
 const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
@@ -15,16 +16,16 @@ const urlDatabase = {
 };
 
 const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
+//   "userRandomID": {
+//     id: "userRandomID", 
+//     email: "user@example.com", 
+//     password: "purple-monkey-dinosaur"
+//   },
+//  "user2RandomID": {
+//     id: "user2RandomID", 
+//     email: "user2@example.com", 
+//     password: "dishwasher-funk"
+//   }
 }
 
 // HELPER FUNCTIONS ----------------------------------
@@ -81,10 +82,9 @@ app.post("/register", (req, res) => {
     users[newUserID] = {
       id: newUserID,
       email: req.body.email,
-      password: req.body.password
+      password: bcrypt.hashSync(req.body.password, 10)
     };
     res.cookie("user_id", newUserID);
-    console.log(users);
     res.redirect("/urls");
   }
 });
@@ -101,7 +101,7 @@ app.post("/login", (req, res) => {
   const currentLogin = getUserByEmail(users, req.body.email);
   if (!currentLogin) {
     res.status(403).send("That account does not exist!");
-  } else if (users[currentLogin].password !== req.body.password) {
+  } else if (!bcrypt.compareSync(req.body.password, users[currentLogin].password)) {
     res.status(403).send("Incorrect password!");
   } else {
     res.cookie("user_id", currentLogin);
