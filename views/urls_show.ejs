@@ -17,7 +17,7 @@
       <div class="card-header"></div>
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
-        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
+        <p class="card-text">Short URL: <a href="/u/<%= shortURL %>">localhost:8080/u/<%= shortURL %></a></p>
         <h5>Edit:</h5>
         <form class="form-inline card-text" action="/urls/<%= shortURL %>" method="POST">
           <div class="form-group mx-auto mb-2">

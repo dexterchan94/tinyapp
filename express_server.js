@@ -22,7 +22,11 @@ const users = {};
 
 // ROUTES -----------------------------------
 app.get("/", (req, res) => {
-  res.redirect("/urls");
+  if (req.session.user_id) {
+    res.redirect("/urls");
+  } else {
+    res.redirect("/login");
+  }
 });
 
 app.get("/register", (req, res) => {
@@ -77,17 +81,12 @@ app.post("/logout", (req, res) => {
 
 
 app.get("/urls", (req, res) => {
-  if (req.session.user_id) {
-    const templateVars = {
-      urls: urlsForUser(req.session.user_id, urlDatabase),
-      user_id: req.session.user_id,
-      users: users
-    };
-    res.render("urls_index", templateVars);
-  } else {
-    res.redirect("/login");
-  }
-
+  const templateVars = {
+    urls: urlsForUser(req.session.user_id, urlDatabase),
+    user_id: req.session.user_id,
+    users: users
+  };
+  res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
