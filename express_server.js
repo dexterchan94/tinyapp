@@ -2,6 +2,7 @@ const express = require("express");
 const cookieSession = require('cookie-session')
 const bcrypt = require('bcrypt');
 const bodyParser = require("body-parser");
+const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers.js');
 const app = express();
 const PORT = 8080;
 
@@ -20,36 +21,6 @@ const urlDatabase = {
 };
 
 const users = {};
-
-// HELPER FUNCTIONS ----------------------------------
-const generateRandomString = (length) => {
-  let result = "";
-  const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  for (let i = 0; i < length; i++) {
-    let char = characters[Math.floor((Math.random() * characters.length))];
-    result += char;
-  }
-  return result;
-};
-
-const getUserByEmail = (users, email) => {
-  for (const user in users) {
-    if (users[user]["email"] === email) {
-      return user;
-    }
-  }
-  return false;
-};
-
-const urlsForUser = (id) => {
-  const result = {};
-  for (const url in urlDatabase) {
-    if (urlDatabase[url]["userID"] === id) {
-      result[url] = urlDatabase[url];
-    }
-  }
-  return result;
-};
 
 
 // ROUTES -----------------------------------
@@ -110,7 +81,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/urls", (req, res) => {
   let templateVars = {
-    urls: urlsForUser(req.session.user_id),
+    urls: urlsForUser(req.session.user_id, urlDatabase),
     user_id: req.session.user_id,
     users: users
   };
