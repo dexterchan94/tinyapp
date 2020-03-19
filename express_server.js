@@ -2,6 +2,7 @@ const express = require("express");
 const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const bodyParser = require("body-parser");
+const methodOverride = require("method-override");
 const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers.js');
 const app = express();
 const PORT = 8080;
@@ -12,6 +13,7 @@ app.use(cookieSession({
   secret: "v2sg1w",
   maxAge: 24 * 60 * 60 * 1000
 }));
+app.use(methodOverride('_method'))
 app.set("view engine", "ejs");
 
 // DATA OBJECTS ------------------------------------
@@ -164,7 +166,7 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL]["userID"]) {
     urlDatabase[req.params.shortURL]["longURL"] = req.body.longURL;
     res.redirect("/urls");
@@ -178,7 +180,7 @@ app.post("/urls/:shortURL", (req, res) => {
   }
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL]["userID"]) {
     delete urlDatabase[req.params.shortURL];
     res.redirect("/urls");
