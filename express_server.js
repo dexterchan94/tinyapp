@@ -16,12 +16,12 @@ app.use(cookieSession({
 app.use(methodOverride('_method'))
 app.set("view engine", "ejs");
 
-// DATA OBJECTS ------------------------------------
+// DATA OBJECTS --------------------------------------------
 const urlDatabase = {};
 
 const users = {};
 
-// ROUTES -----------------------------------
+// ROUTES --------------------------------------------------
 app.get("/", (req, res) => {
   if (users[req.session.user_id]) {
     res.redirect("/urls");
@@ -30,6 +30,8 @@ app.get("/", (req, res) => {
   }
 });
 
+
+// Redirect to URLs page if user is already logged in
 app.get("/register", (req, res) => {
   if (users[req.session.user_id]) {
     res.redirect("/urls");
@@ -43,7 +45,9 @@ app.get("/register", (req, res) => {
   }
 });
 
+
 app.post("/register", (req, res) => {
+  // Incomplete form
   if (req.body.email === "" || req.body.password === "") {
     const templateVars = {
       user_id: req.session.user_id,
@@ -51,6 +55,8 @@ app.post("/register", (req, res) => {
       error: "empty"
     };
     res.status(400).render("register", templateVars);
+
+  // Account already exists
   } else if (getUserByEmail(users, req.body.email)) {
     const templateVars = {
       user_id: req.session.user_id,
@@ -58,6 +64,8 @@ app.post("/register", (req, res) => {
       error: "duplicate"
     };
     res.status(400).render("register", templateVars);
+
+  // Success
   } else {
     const newUserID = generateRandomString(6);
     users[newUserID] = {
@@ -70,6 +78,8 @@ app.post("/register", (req, res) => {
   }
 });
 
+
+// Redirect to URLs page if user is already logged in
 app.get("/login", (req, res) => {
   if (users[req.session.user_id]) {
     res.redirect("/urls");
@@ -83,8 +93,12 @@ app.get("/login", (req, res) => {
   }
 });
 
+
 app.post("/login", (req, res) => {
+  // Retrieve userID corresponding to email
   const currentLogin = getUserByEmail(users, req.body.email);
+
+  // Account does not exist
   if (!currentLogin) {
     const templateVars = {
       user_id: req.session.user_id,
@@ -92,6 +106,8 @@ app.post("/login", (req, res) => {
       error: "account"
     };
     res.status(403).render("login", templateVars);
+
+  // Incorrect password
   } else if (!bcrypt.compareSync(req.body.password, users[currentLogin].password)) {
     const templateVars = {
       user_id: req.session.user_id,
@@ -99,17 +115,23 @@ app.post("/login", (req, res) => {
       error: "password"
     };
     res.status(403).render("login", templateVars);
+
+  // Success
   } else {
     req.session.user_id = currentLogin;
     res.redirect("/urls");
   }
 });
 
+
+// Delete current session cookie
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
 });
 
+
+// List all URLs that were created by the current user
 app.get("/urls", (req, res) => {
   const templateVars = {
     urls: urlsForUser(req.session.user_id, urlDatabase),
@@ -119,6 +141,8 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
+
+// Add new URL if the user is logged in
 app.post("/urls", (req, res) => {
   if (users[req.session.user_id]) {
     const shortURL = generateRandomString(6);
@@ -143,6 +167,8 @@ app.post("/urls", (req, res) => {
   }
 });
 
+
+// Render 'Create new URL' page if user is logged in
 app.get("/urls/new", (req, res) => {
   if (users[req.session.user_id]) {
     const templateVars = {
@@ -155,7 +181,9 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+
 app.get("/urls/:shortURL", (req, res) => {
+  // The shortURL exists
   if (urlDatabase[req.params.shortURL]) {
     const templateVars = {
       shortURL: req.params.shortURL,
@@ -165,6 +193,8 @@ app.get("/urls/:shortURL", (req, res) => {
       urlDatabase
     };
     res.render("urls_show", templateVars);
+    
+  // The shortURL does not exist
   } else {
     const templateVars = {
       user_id: req.session.user_id,
@@ -175,6 +205,8 @@ app.get("/urls/:shortURL", (req, res) => {
   }
 });
 
+
+// Update the shortURL if it was originally created by the logged in user
 app.put("/urls/:shortURL", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL]["userID"]) {
     urlDatabase[req.params.shortURL]["longURL"] = req.body.longURL;
@@ -189,6 +221,8 @@ app.put("/urls/:shortURL", (req, res) => {
   }
 });
 
+
+// Delete short URL if it was originally created by the logged in user
 app.delete("/urls/:shortURL/delete", (req, res) => {
   if (req.session.user_id === urlDatabase[req.params.shortURL]["userID"]) {
     delete urlDatabase[req.params.shortURL];
@@ -203,18 +237,30 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+
+// Redirect to long URL
 app.get("/u/:shortURL", (req, res) => {
+  // Short URL exists
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL]["longURL"];
+
+    // Increment total view count
     urlDatabase[req.params.shortURL]["viewCount"] += 1;
+
+    // Increment unique view count if user has not visited that short URL before
     if (!urlDatabase[req.params.shortURL]["visitors"].includes(req.session.visitor_id)) {
       req.session.visitor_id = generateRandomString(6);
       urlDatabase[req.params.shortURL]["uniqueViews"] += 1;
     }
+
+    // Store visitor cookie and time of visit in database
     const newDate = (new Date()).toLocaleString("en-US", {timeZone: "America/Vancouver", timeZoneName: "short"});
     urlDatabase[req.params.shortURL]["visitors"].push(req.session.visitor_id);
     urlDatabase[req.params.shortURL]["visitDates"].push(newDate);
+
     res.redirect(longURL);
+
+  // Short URL does not exist
   } else {
     const templateVars = {
       user_id: req.session.user_id,
