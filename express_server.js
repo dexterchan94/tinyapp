@@ -1,5 +1,5 @@
 const express = require("express");
-const cookieSession = require('cookie-session')
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 const bodyParser = require("body-parser");
 const { getUserByEmail, generateRandomString, urlsForUser } = require('./helpers.js');
@@ -19,10 +19,9 @@ const urlDatabase = {};
 
 const users = {};
 
-
 // ROUTES -----------------------------------
 app.get("/", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   } else {
     res.redirect("/login");
@@ -30,7 +29,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   } else {
     const templateVars = {
@@ -70,7 +69,7 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     res.redirect("/urls");
   } else {
     const templateVars = {
@@ -80,7 +79,6 @@ app.get("/login", (req, res) => {
     };
     res.render("login", templateVars);
   }
-
 });
 
 app.post("/login", (req, res) => {
@@ -108,8 +106,7 @@ app.post("/login", (req, res) => {
 app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/urls");
-})
-
+});
 
 app.get("/urls", (req, res) => {
   const templateVars = {
@@ -133,7 +130,6 @@ app.post("/urls", (req, res) => {
     };
     res.status(401).render("unauthorized", templateVars);
   }
-
 });
 
 app.get("/urls/new", (req, res) => {
@@ -146,7 +142,6 @@ app.get("/urls/new", (req, res) => {
   } else {
     res.redirect("/login");
   }
-
 });
 
 app.get("/urls/:shortURL", (req, res) => {
@@ -167,7 +162,6 @@ app.get("/urls/:shortURL", (req, res) => {
     };
     res.status(404).render("url_none", templateVars);
   }
-
 });
 
 app.post("/urls/:shortURL", (req, res) => {
@@ -198,7 +192,6 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
-
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL]["longURL"];
@@ -215,6 +208,5 @@ app.get("/u/:shortURL", (req, res) => {
 
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  console.log(`App listening on port ${PORT}!`);
 });
-
