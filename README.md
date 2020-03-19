@@ -7,7 +7,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 ### Create New URL Page:
 !["Create URL page"](https://github.com/dexterchan94/tinyapp/blob/master/docs/create-url-page.png?raw=true)
 
-### Edit Existing URL Page:
+### Edit Existing URL and View Visit Data Page:
 !["Edit URL page"](https://github.com/dexterchan94/tinyapp/blob/master/docs/edit-url-page.png?raw=true)
 
 ### View All URLs Page:
@@ -28,3 +28,4 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 - Install all dependencies (using the `npm install` command).
 - Run the development web server using the `node express_server.js` command.
+- Access the app in browser via localhost:8080/
