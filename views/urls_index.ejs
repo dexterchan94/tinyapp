@@ -21,6 +21,9 @@
               <th scope="col">Long URL</th>
               <th scope="col">Edit</th>
               <th scope="col">Delete</th>
+              <th scope="col">Date Created</th>
+              <th scope="col">Total Visits</th>
+              <th scope="col">Unique Visits</th>
             </tr>
           </thead>
           <tbody>
@@ -34,6 +37,9 @@
                     <button type="submit" class="btn btn-outline-danger">Delete</button>
                   </form>
                 </td>
+                <td><%= urls[url]["dateCreated"] %></td>
+                <td><%= urls[url]["viewCount"] %></td>
+                <td><%= urls[url]["uniqueViews"] %></td>
               </tr>
             <% } %>
           </tbody>

@@ -120,9 +120,18 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     const shortURL = generateRandomString(6);
-    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: req.session.user_id };
+    const newDate = (new Date()).toLocaleString("en-US", {timeZone: "America/Vancouver", timeZoneName: "short"});
+    urlDatabase[shortURL] = { 
+      longURL: req.body.longURL,
+      userID: req.session.user_id,
+      dateCreated: newDate,
+      viewCount: 0,
+      uniqueViews: 0,
+      visitors: [],
+      visitDates: []
+    };
     res.redirect(`/urls/${shortURL}`);
   } else {
     const templateVars = {
@@ -135,7 +144,7 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (req.session.user_id) {
+  if (users[req.session.user_id]) {
     const templateVars = {
       user_id: req.session.user_id,
       users
@@ -197,6 +206,14 @@ app.delete("/urls/:shortURL/delete", (req, res) => {
 app.get("/u/:shortURL", (req, res) => {
   if (urlDatabase[req.params.shortURL]) {
     const longURL = urlDatabase[req.params.shortURL]["longURL"];
+    urlDatabase[req.params.shortURL]["viewCount"] += 1;
+    if (!urlDatabase[req.params.shortURL]["visitors"].includes(req.session.visitor_id)) {
+      req.session.visitor_id = generateRandomString(6);
+      urlDatabase[req.params.shortURL]["uniqueViews"] += 1;
+    }
+    const newDate = (new Date()).toLocaleString("en-US", {timeZone: "America/Vancouver", timeZoneName: "short"});
+    urlDatabase[req.params.shortURL]["visitors"].push(req.session.visitor_id);
+    urlDatabase[req.params.shortURL]["visitDates"].push(newDate);
     res.redirect(longURL);
   } else {
     const templateVars = {

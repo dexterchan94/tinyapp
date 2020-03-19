@@ -28,6 +28,9 @@
         <div class="card-body">
           <h5 class="card-title">TinyURL for: <%= longURL %></h5>
           <p class="card-text">Short URL: <a href="/u/<%= shortURL %>" target="_blank">localhost:8080/u/<%= shortURL %></a></p>
+          <p class="card-text">Date Created: <%= urlDatabase[shortURL]["dateCreated"] %></p>
+          <p class="card-text">Total Views: <%= urlDatabase[shortURL]["viewCount"] %></p>
+          <p class="card-text">Unique Visits: <%= urlDatabase[shortURL]["uniqueViews"] %></p>
           <h5 class="mt-5">Edit this URL:</h5>
           <form class="form-inline card-text" action="/urls/<%= shortURL %>?_method=PUT" method="POST">
             <div class="form-group mx-auto mb-2">
@@ -36,6 +39,17 @@
               <button type="submit" class="btn btn-primary">Submit</button>
             </div>
           </form>
+        </div>
+        <div class="card-footer text-muted"></div>
+
+        <div class="card-header"></div>
+        <div class="card-body">
+          <h5 class="card-title">Visit Log</h5>
+          <% for (let i = 0; i < urlDatabase[shortURL]["visitors"].length; i++) { %>
+
+          <p class="card-text">Date visited: <%= urlDatabase[shortURL]["visitDates"][i] %> - Visitor ID: <%= urlDatabase[shortURL]["visitors"][i] %> </p>
+
+          <% } %>
         </div>
         <div class="card-footer text-muted"></div>
       </div>
